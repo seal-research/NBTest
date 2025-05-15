@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nbtest_plugin"
+version = "0.1.6"
+description = "Pytest plugin for testing Jupyter Notebooks"
+classifiers = ["Framework :: Pytest"]
+readme = { file = "README.md", content-type = "text/markdown" }
+dependencies = ["nbformat", "pandas", "numpy", "pytest", "jupyter"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nbtest"]
+
+[project.entry-points.pytest11]
+nbtest = "nbtest.conftest"

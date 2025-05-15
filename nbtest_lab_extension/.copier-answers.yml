@@ -1,0 +1,14 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.3.8
+_src_path: https://github.com/jupyterlab/extension-template
+author_email: vedantnimjed@gmail.com
+author_name: vrnimje
+has_binder: false
+has_settings: false
+kind: frontend
+labextension_name: nbtest_lab_extension
+project_short_description: 'A JupyterLab extension for enabling/disabling nbtest assertions. '
+python_name: nbtest_lab_extension
+repository: ''
+test: true
+

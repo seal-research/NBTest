@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nbtest-gen"
+version = "0.2.5"
+description = "Comprehensive Framework for generating high-quality assertions (tests) for Jupyter Notebooks"
+classifiers = ["Framework :: Pytest"]
+readme = { file = "README.md", content-type = "text/markdown" }
+dependencies = ["nbformat", "pandas", "numpy", "nbtest-plugin"]
+
+[project.scripts]
+nbtest-gen = "nbtest_gen:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.hatch.build.targets.sdist]
+artifacts = ["."]
+exclude = ["nbtest_plugin", "nbtest_lab_extension"]

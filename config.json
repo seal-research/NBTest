@@ -1,0 +1,749 @@
+{
+  "FILE_PATH": {
+    "ASSERTION_GENERATED_CSV": "assertion_generated.csv",
+    "PROPERTIES_CSV": "properties.csv",
+    "TMP_IPYNB": "tmp.ipynb",
+    "PARSE_LOG": "parse_log.pkl",
+    "PROPERTIES_DF": "properties_df.pkl",
+    "INSTRUMENTATION_PKL": "instrumentation.pkl",
+    "PROCESSED_IPYNB": "processed.ipynb"
+  },
+
+  "MUTANT_TYPES": {
+    "outliers": "num_outliers=int(len(df)*outlier_ratio)\noutlier_indices=np.random.choice(df.index,num_outliers,replace=False)\nfor col in numerical_cols:\n    df.loc[outlier_indices,col]=temp.astype(df[col].dtype)",
+    "repetition": "num_removed=int(len(df)*removal_ratio)\nremove_indices=np.random.choice(df.index,size=num_removed,replace=False)\nreplace_indices=np.random.choice(df.index.difference(remove_indices),size=num_removed,replace=False)\ndf.iloc[remove_indices]=df.iloc[replace_indices].values",
+    "added_null": "num_cols_to_null=max(1,int(len(df.columns)*subset_ratio))\ncols_to_null=np.random.choice(df.columns,size=num_cols_to_null,replace=False)\nfor col in cols_to_null:\n    num_nulls=int(len(df)*rows_ratio)\n    null_indices=np.random.choice(df.index,size=num_nulls,replace=False)\n    df.loc[null_indices,col]=np.nan",
+    "remove_torch_eval": "tree=ast.parse(cell.source)\ntree=EvalRemover(logger).visit(tree)\nast.fix_missing_locations(tree)",
+    "remove_torch_zero_grad": "tree=ast.parse(cell.source)\ntree=ZeroGradRemover(logger).visit(tree)\nast.fix_missing_locations(tree)",
+    "modify_hyperparameters": "num_to_modify=max(1,int(len(node.keywords)*modification_ratio))\nparams_to_modify=random.sample(node.keywords,num_to_modify)\nparams=\"\".join([keyword.arg for keyword in node.keywords])\nlogger.debug(f\"Modifying {call_type} '{call_name}' with parameters: {params}\")\nfor keyword in params_to_modify:\n    if modification_type=='remove':\n        if is_essential_param(keyword.arg,call_name):\n            continue\n        node.keywords.remove(keyword)\n        modified=True\n    else:\n        if modify_parameter(keyword,call_name):\n            modified=True",
+    "remove_hyperparameters": "num_to_modify=max(1,int(len(node.keywords)*modification_ratio))\nparams_to_modify=random.sample(node.keywords,num_to_modify)\nparams=\"\".join([keyword.arg for keyword in node.keywords])\nlogger.debug(f\"Modifying {call_type} '{call_name}' with parameters: {params}\")\nfor keyword in params_to_modify:\n    if modification_type=='remove':\n        if is_essential_param(keyword.arg,call_name):\n            continue\n        node.keywords.remove(keyword)\n        modified=True\n    else:\n        if modify_parameter(keyword,call_name):\n            modified=True",
+    "label_errors": "num_errors=max(1,int(len(y)*error_ratio))\nerror_indices=np.random.choice(len(y),num_errors,replace=False)\nfor idx in error_indices:\n    original_label=y.iloc[idx]\n    new_label=original_label\n    while(new_label==original_label):\n        new_label=np.random.choice(unique_labels)\n    df.loc[idx,label_slice]=new_label",
+    "preproc_data_leakage": "if api_cell > train_test_cell or (api_cell == train_test_cell and api_line > train_test_line):\n    mutant_cell = notebook.cells[train_test_cell].source\n    lines.append(f\"{X_var} = {var_name}.{api_name}({X_var})\")\n    logger.debug(f\"New lines: {str(lines)}\")\n    tree = ast.parse(mutant_cell)\n    new_tree = AddLinesBeforeTrainTestSplit(logger, lines).visit(tree)\n    notebook.cells[train_test_cell].source = ast.unparse(new_tree)",
+    "data_shift": "from scipy.stats import spearmanr, pearsonr\ncorrelations = {{}}\nfor col in {X_train}.columns:\n    if col != label_col:\n        corr, _ = spearmanr({X_train}[col], {Y_train})\n        correlations[col] = abs(corr)\n        \nmost_correlated_feature = max(correlations, key=correlations.get)\n\n# Break correlation by randomizing the feature in the test set\n{X_test}[most_correlated_feature] = np.random.permutation({X_test}[most_correlated_feature].values)",
+    "metric_swap": "node.func.id = new_value\nself.logger.info(f'Cell {self.cell_index}: Swapped {old_value} → {new_value} with parameter adjustments')\nself.changed = True\nif new_value not in self.existing_imports:\n    self.missing_imports.add(new_value)\n\nparams = {kw.arg: ast.unparse(kw.value) for kw in node.keywords}\n\nself.swaps_performed.append({\n    'line': getattr(node, 'lineno', 0),\n    'old_value': old_value,\n    'new_value': new_value,\n    'params': params,\n})"
+  },
+
+  "KNOWN_APIS": {
+    "train_test_split": {
+      "assert_type": "DATASET"
+    },
+    "read_csv": {
+      "assert_type": "DATASET"
+    },
+    "DataFrame": {
+      "assert_type": "DATASET"
+    },
+    "sqrt": {
+      "assert_type": "MODEL_PERF"
+    },
+    "fit": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "Sequential": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "Model": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "Module": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LSTM": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "AdaBoostClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "AdaBoostRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "BaggingClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "BaggingRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ExtraTreesClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ExtraTreesRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "GradientBoostingClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "GradientBoostingRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "HistGradientBoostingClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "HistGradientBoostingRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "IsolationForest": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RandomForestClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RandomForestRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RandomTreesEmbedding": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "StackingClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "StackingRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "VotingClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "VotingRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LogisticRegression": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LogisticRegressionCV": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "PassiveAggressiveClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "Perceptron": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RidgeClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RidgeClassifierCV": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "SGDClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "SGDOneClassSVM": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LinearRegression": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "Ridge": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RidgeCV": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "SGDRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ElasticNet": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ElasticNetCV": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "Lars": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LarsCV": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "Lasso": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LassoCV": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LassoLars": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LassoLarsCV": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LassoLarsIC": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "OrthogonalMatchingPursuit": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "OrthogonalMatchingPursuitCV": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ARDRegression": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "BayesianRidge": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MultiTaskElasticNet": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MultiTaskElasticNetCV": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MultiTaskLasso": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MultiTaskLassoCV": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "HuberRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "QuantileRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RANSACRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "TheilSenRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "GammaRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "PoissonRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "TweedieRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "PassiveAggressiveRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ridge_regression": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "DecisionTreeClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "DecisionTreeRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ExtraTreeClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ExtraTreeRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LinearSVC": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LinearSVR": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "NuSVC": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "NuSVR": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "OneClassSVM": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "SVC": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "SVR": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "AffinityPropagation": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "AgglomerativeClustering": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "Birch": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "BisectingKMeans": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "DBSCAN": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "FeatureAgglomeration": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "HDBSCAN": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "KMeans": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MeanShift": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MiniBatchKMeans": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "OPTICS": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "SpectralBiclustering": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "SpectralClustering": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "SpectralCoclustering": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "affinity_propagation": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "cluster_optics_dbscan": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "cluster_optics_xi": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "k_means": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "kmeans_plusplus": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "mean_shift": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "spectral_clustering": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ward_tree": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "BernoulliRBM": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MLPClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MLPRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "FeatureUnion": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "Pipeline": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "make_pipeline": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "make_union": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LabelPropagation": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LabelSpreading": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "SelfTrainingClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "BernoulliNB": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "CategoricalNB": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ComplementNB": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "GaussianNB": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MultinomialNB": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "BallTree": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "KDTree": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "KNeighborsClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "KNeighborsRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "KNeighborsTransformer": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "NearestCentroid": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "NearestNeighbors": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "NeighborhoodComponentsAnalysis": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RadiusNeighborsClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RadiusNeighborsRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RadiusNeighborsTransformer": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LinearDiscriminantAnalysis": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "QuadraticDiscriminantAnalysis": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "KernelRidge": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "OneVsOneClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "OneVsRestClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "OutputCodeClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "ClassifierChain": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MultiOutputClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "MultiOutputRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "RegressorChain": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "XGBRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "XGBClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "XGBRanker": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "XGBRFRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "XGBRFClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LGBMRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LGBMRanker": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LGBMClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "LGBMModel": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "CatBoost": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "CatBoostClassifier": {
+      "assert_type": "MODEL_ARCH"
+    },
+    "CatBoostRegressor": {
+      "assert_type": "MODEL_ARCH"
+    },
+
+    "accuracy_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "auc": {
+      "assert_type": "MODEL_PERF"
+    },
+    "average_precision_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "balanced_accuracy_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "brier_score_loss": {
+      "assert_type": "MODEL_PERF"
+    },
+    "class_likelihood_ratios": {
+      "assert_type": "MODEL_PERF"
+    },
+    "cohen_kappa_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "d2_log_loss_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "dcg_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "det_curve": {
+      "assert_type": "MODEL_PERF"
+    },
+    "f1_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "fbeta_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "hamming_loss": {
+      "assert_type": "MODEL_PERF"
+    },
+    "hinge_loss": {
+      "assert_type": "MODEL_PERF"
+    },
+    "jaccard_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "log_loss": {
+      "assert_type": "MODEL_PERF"
+    },
+    "matthews_corrcoef": {
+      "assert_type": "MODEL_PERF"
+    },
+    "multilabel_confusion_matrix": {
+      "assert_type": "MODEL_PERF"
+    },
+    "ndcg_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "precision_recall_curve": {
+      "assert_type": "MODEL_PERF"
+    },
+    "precision_recall_fscore_support": {
+      "assert_type": "MODEL_PERF"
+    },
+    "precision_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "recall_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "roc_auc_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "top_k_accuracy_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "zero_one_loss": {
+      "assert_type": "MODEL_PERF"
+    },
+    "d2_absolute_error_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "d2_pinball_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "d2_tweedie_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "explained_variance_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "max_error": {
+      "assert_type": "MODEL_PERF"
+    },
+    "mean_absolute_error": {
+      "assert_type": "MODEL_PERF"
+    },
+    "mean_absolute_percentage_error": {
+      "assert_type": "MODEL_PERF"
+    },
+    "mean_gamma_deviance": {
+      "assert_type": "MODEL_PERF"
+    },
+    "mean_pinball_loss": {
+      "assert_type": "MODEL_PERF"
+    },
+    "mean_poisson_deviance": {
+      "assert_type": "MODEL_PERF"
+    },
+    "mean_squared_error": {
+      "assert_type": "MODEL_PERF"
+    },
+    "mean_squared_log_error": {
+      "assert_type": "MODEL_PERF"
+    },
+    "mean_tweedie_deviance": {
+      "assert_type": "MODEL_PERF"
+    },
+    "median_absolute_error": {
+      "assert_type": "MODEL_PERF"
+    },
+    "r2_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "root_mean_squared_error": {
+      "assert_type": "MODEL_PERF"
+    },
+    "root_mean_squared_log_error": {
+      "assert_type": "MODEL_PERF"
+    },
+    "coverage_error": {
+      "assert_type": "MODEL_PERF"
+    },
+    "label_ranking_average_precision_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "label_ranking_loss": {
+      "assert_type": "MODEL_PERF"
+    },
+    "adjusted_mutual_info_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "adjusted_rand_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "calinski_harabasz_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "contingency_matrix": {
+      "assert_type": "MODEL_PERF"
+    },
+    "pair_confusion_matrix": {
+      "assert_type": "MODEL_PERF"
+    },
+    "completeness_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "davies_bouldin_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "fowlkes_mallows_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "homogeneity_completeness_v_measure": {
+      "assert_type": "MODEL_PERF"
+    },
+    "homogeneity_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "mutual_info_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "normalized_mutual_info_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "rand_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "silhouette_samples": {
+      "assert_type": "MODEL_PERF"
+    },
+    "silhouette_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "v_measure_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "consensus_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "DistanceMetric": {
+      "assert_type": "MODEL_PERF"
+    },
+    "additive_chi2_kernel": {
+      "assert_type": "MODEL_PERF"
+    },
+    "chi2_kernel": {
+      "assert_type": "MODEL_PERF"
+    },
+    "cosine_distances": {
+      "assert_type": "MODEL_PERF"
+    },
+    "cosine_similarity": {
+      "assert_type": "MODEL_PERF"
+    },
+    "distance_metrics": {
+      "assert_type": "MODEL_PERF"
+    },
+    "euclidean_distances": {
+      "assert_type": "MODEL_PERF"
+    },
+    "haversine_distances": {
+      "assert_type": "MODEL_PERF"
+    },
+    "kernel_metrics": {
+      "assert_type": "MODEL_PERF"
+    },
+    "laplacian_kernel": {
+      "assert_type": "MODEL_PERF"
+    },
+    "linear_kernel": {
+      "assert_type": "MODEL_PERF"
+    },
+    "manhattan_distances": {
+      "assert_type": "MODEL_PERF"
+    },
+    "nan_euclidean_distances": {
+      "assert_type": "MODEL_PERF"
+    },
+    "paired_cosine_distances": {
+      "assert_type": "MODEL_PERF"
+    },
+    "paired_distances": {
+      "assert_type": "MODEL_PERF"
+    },
+    "paired_euclidean_distances": {
+      "assert_type": "MODEL_PERF"
+    },
+    "paired_manhattan_distances": {
+      "assert_type": "MODEL_PERF"
+    },
+    "pairwise_kernels": {
+      "assert_type": "MODEL_PERF"
+    },
+    "polynomial_kernel": {
+      "assert_type": "MODEL_PERF"
+    },
+    "rbf_kernel": {
+      "assert_type": "MODEL_PERF"
+    },
+    "sigmoid_kernel": {
+      "assert_type": "MODEL_PERF"
+    },
+    "pairwise_distances": {
+      "assert_type": "MODEL_PERF"
+    },
+    "pairwise_distances_argmin": {
+      "assert_type": "MODEL_PERF"
+    },
+    "pairwise_distances_argmin_min": {
+      "assert_type": "MODEL_PERF"
+    },
+    "pairwise_distances_chunked": {
+      "assert_type": "MODEL_PERF"
+    },
+    "logloss": {
+      "assert_type": "MODEL_PERF"
+    },
+    "evaluate": {
+      "assert_type": "MODEL_PERF"
+    },
+    "best_score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "score": {
+      "assert_type": "MODEL_PERF"
+    },
+    "classification_report": {
+      "assert_type": "MODEL_PERF"
+    },
+    "confusion_matrix": {
+      "assert_type": "MODEL_PERF"
+    }
+  }
+}
