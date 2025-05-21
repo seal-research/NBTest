@@ -1,0 +1,11 @@
+pandas
+numpy
+matplotlib
+scikit-learn
+seaborn
+jupyter
+--extra-index-url https://test.pypi.org/simple/
+nbtest-plugin
+nbtest-gen
+nbtest-lab-extension
+
