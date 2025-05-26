@@ -1,42 +1,17 @@
-name: nbtest_demo
+name: nbtest_env
 channels:
-  - conda-forge
   - defaults
+  - conda-forge
 dependencies:
-  - python=3.9.22
-  - pip=25.1.1
-  - ca-certificates=2025.4.26
-  - openssl=3.5.0
-  - setuptools=80.1.0
-  - wheel=0.45.1
-  - numpy=2.0.2
-  - pandas=2.2.3
-  - scipy=1.13.1
-  - scikit-learn=1.6.1
-  - matplotlib=3.9.4
-  - seaborn=0.13.2
-  - jupyterlab=4.4.2
-  - ipykernel=6.29.5
-  - ipywidgets=8.1.7
-  - notebook=7.4.2
-  - nbconvert=7.16.6
-  - nbformat=5.10.4
-  - pytest=8.3.5
+  - python=3.9
+  - numpy<2
+  - pandas
+  - tensorflow=2.14.0
+  - scikit-learn
+  - jupyter
+  - pip
   - pip:
-      - --index-url https://test.pypi.org/simple/
-      - --extra-index-url https://pypi.org/simple
-      - nbtest-gen==0.2.5
-      - nbtest-lab-extension==0.1.0
-      - nbtest-plugin==0.1.6
-      - missingno==0.5.2
-      - fastjsonschema==2.21.1
-      - matplotlib-inline==0.1.7
-      - psutil==7.0.0
-      - pyzmq==26.4.0
-      - traitlets==5.14.3
-      - jinja2==3.1.6
-      - tornado==6.4.2
-      - typing-extensions==4.13.2
-      - python-dateutil==2.9.0.post0
-      - pyyaml==6.0.2
-      - requests==2.32.3
+      - --extra-index-url https://test.pypi.org/simple/
+      - nbtest-plugin
+      - nbtest-gen
+      - nbtest-lab-extension

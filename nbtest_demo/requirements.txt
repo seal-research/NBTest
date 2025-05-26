@@ -1,11 +1,9 @@
+numpy<2
 pandas
-numpy
-matplotlib
+tensorflow==2.14.0
 scikit-learn
-seaborn
 jupyter
 --extra-index-url https://test.pypi.org/simple/
 nbtest-plugin
 nbtest-gen
 nbtest-lab-extension
-
