@@ -3,7 +3,6 @@ pandas
 tensorflow==2.14.0
 scikit-learn
 jupyter
---extra-index-url https://test.pypi.org/simple/
 nbtest-plugin
 nbtest-gen
 nbtest-lab-extension
