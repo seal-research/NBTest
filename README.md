@@ -15,6 +15,20 @@ You can toggle assertions on or off depending on your workflow:
 * **During development**, keep assertions off to avoid interruption.
 * **After development**, enable assertions to verify consistency with previous runs.
 
+**JupyterLab NBTest Plugin UI**
+
+![JupyterLab](./figures/assertion_pass.png)
+The NBTest assertions appear in the right-hand side panel of JupyterLab.
+You can hide this panel with the **Hide Assertion Editor** button or enable/disable assertions using the **Toggle Assertions** button.
+When all assertions pass, a green notification bar labeled *Assertions Passed* is displayed.
+
+**Running NBTest with Pytest**
+
+NBTest can also be executed through pytest.
+The example below shows the pytest output when running a Jupyter notebook that includes NBTest assertions:
+  
+![JupyterLab](./figures/pytest.png)
+
 ---
 
 ## Part 2: Installation
