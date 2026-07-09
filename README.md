@@ -334,6 +334,10 @@ nbtest.assert_allclose(r2_score(y_test, y_pred), 0.82, atol=0.35)
 
 This project is licensed under the MIT License.
 
+## Reproducing the Experiment Results
+
+To reproduce the experiment results reported in our ASE'26 paper, *Automated Assertion Generation and Regression Testing for Machine Learning Notebooks*, please refer to the accompanying artifact: https://doi.org/10.5281/zenodo.19245756.
+
 ## Contact
 
 Questions or feedback? Reach out to Elaine Yao [yy2282@cornell.edu]
